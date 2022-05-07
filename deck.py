@@ -1,6 +1,8 @@
+from turtle import color
 import pygame, random
 from pygame.locals import *
 from city import City
+from card import Card
 from settings import *
 
 class Deck:
@@ -8,23 +10,26 @@ class Deck:
         self.cards  = []
         self.name   = name
         for city in list:
-            self.cards.append(City(city[0],city[1],city[2]))
+            #self.cards.append(City(city[0],city[1],city[2]))
+            self.cards.append(Card(name=city[0],color=city[1],pos=city[2]))
+
     def deal(self, nb, deck_to):
         for x in range(nb):
-            card = random.choice(self.cards)
+            card = self.cards.pop(0)
             deck_to.append(card)
-            self.cards.remove(card)
+
     def append(self, card):
         self.cards.append(card)
-    def draw_title(self, screen, x, y):
-        font_size = 24
-        font = pygame.font.SysFont(None, font_size)
-        pygame.draw.rect(screen,white,pygame.Rect(x, y, card_width, card_height))
-        pygame.draw.rect(screen,black,pygame.Rect(x+2, y+2, card_width-4, card_height-4))
-        text = font.render(self.name, True, white)
-        outline = font.render(self.name, True, black)
-        screen.blit(outline, (x+9,y+(card_height-font_size)/2))
-        screen.blit(outline, (x+11,y+(card_height-font_size)/2))
-        screen.blit(outline, (x+10,y+(card_height-font_size)/2-1))
-        screen.blit(outline, (x+10,y+(card_height-font_size)/2+1))
-        screen.blit(text, (x+10,y+(card_height-font_size)/2))
+
+    def draw(self,screen,pos):
+        x,y=pos
+        deck_title=Card(name=self.name, color=black, pos=pos)
+        deck_title.draw(screen)
+        for c in self.cards:
+            y+=card_height
+            c.pos=(x,y)
+            c.draw(screen)
+    
+    def shuffle(self):
+        random.shuffle(self.cards)
+

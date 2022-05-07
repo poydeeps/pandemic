@@ -1,9 +1,11 @@
 import pygame, random
 from pygame.locals import *
+from clickable import Clickable
 from settings import *
 from city import City
 from map import Map
 from deck import Deck
+from card import Card
 
 pygame.init()
 font = pygame.font.SysFont(None, 24)
@@ -14,7 +16,9 @@ clock = pygame.time.Clock()
 m = Map(list)
 
 player_deck     = Deck(list)
+player_deck.shuffle()
 infection_deck  = Deck(list)
+infection_deck.shuffle()
 
 #deal player's hand
 player_hand     = Deck([],'PLAYER\'S HAND')
@@ -24,63 +28,48 @@ player_deck.deal(3, player_hand)
 archive         = Deck([],'ARCHIVE')
 player_deck.deal(3, archive)
 
-#add event cards
 
-crashed = False
-while not crashed:
+dummy_clickable=Clickable(pos=(0,0))
+hovered_object = dummy_clickable
 
+def init_screen():
     screen.blit(pygame.image.load('map.png'), (0,0))
     screen.blit(pygame.image.load('infection.png'), (968,13))
     screen.blit(pygame.image.load('outbreak.png'), (1489,429))
 
-    y = 30
-    player_hand.draw_title(screen, 1623, 30)
-    y+=32
-    for c in player_hand.cards:
-        pygame.draw.rect(screen,white,pygame.Rect(1623, y-11, 277, 34))
-        pygame.draw.rect(screen,c.color,pygame.Rect(1624, y-9, 273, 30))
-        text = font.render(c.name, True, white)
-        outline = font.render(c.name, True, black)
-        screen.blit(outline, (1634,y))
-        screen.blit(outline, (1636,y))
-        screen.blit(outline, (1635,y-1))
-        screen.blit(outline, (1635,y+1))
-        screen.blit(text, (1635,y))
-        y+=32
+    player_hand.draw(screen,(1623,30))
+    archive.draw(screen,(1623,200))
 
-    y+=32
+def check_hover():
+    global hovered_object
+    if not hovered_object.is_hovered():
+        hovered_object = dummy_clickable
+        for c in player_hand.cards + archive.cards + m.cities:
+            if c.is_hovered():
+                c.hover = True
+                hovered_object=c
+            else:
+                c.hover=False
 
-    pygame.draw.rect(screen,white,pygame.Rect(1623, y-11, 277, 34))
-    pygame.draw.rect(screen,black,pygame.Rect(1624, y-9, 273, 30))
-    text = font.render("ARCHIVE", True, white)
-    outline = font.render("ARCHIVE", True, black)
-    screen.blit(outline, (1634,y))
-    screen.blit(outline, (1636,y))
-    screen.blit(outline, (1635,y-1))
-    screen.blit(outline, (1635,y+1))
-    screen.blit(text, (1635,y))
-    y+=32
-    for c in archive.cards:
-        pygame.draw.rect(screen,white,pygame.Rect(1623, y-11, 277, 34))
-        pygame.draw.rect(screen,c.color,pygame.Rect(1624, y-9, 273, 30))
-        text = font.render(c.name, True, white)
-        outline = font.render(c.name, True, black)
-        screen.blit(outline, (1634,y))
-        screen.blit(outline, (1636,y))
-        screen.blit(outline, (1635,y-1))
-        screen.blit(outline, (1635,y+1))
-        screen.blit(text, (1635,y))
-        y+=32
-
-    over = False
-    city_circles = screen.copy()
-    for c in m.cities:
-        if pygame.draw.circle(city_circles, green, c.pos, 33, 33).collidepoint(pygame.mouse.get_pos()):
-            over = True
-    if over == True:
+def draw_glow():
+    if hovered_object.hover:
+        hovered_object.draw_glow(screen)
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
     else:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+        
+#add event cards
+
+init_screen()
+
+crashed = False
+while not crashed:
+
+    check_hover()
+
+    init_screen()
+    draw_glow()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
