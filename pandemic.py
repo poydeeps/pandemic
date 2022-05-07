@@ -58,7 +58,7 @@ def draw_glow():
     else:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
-        
+
 #add event cards
 
 init_screen()
@@ -80,6 +80,6 @@ while not crashed:
                 pygame.quit()
 
     pygame.display.update()
-    clock.tick(60)
+    clock.tick(15)
 
 pygame.quit()
