@@ -1,22 +1,35 @@
 from turtle import Screen
 import pygame
 from clickable import Clickable
+from infection import Infection
 from settings import *
+import math
 
 class City(Clickable):
     
     def __init__(self,**kw):
         self.pos=kw.get('pos')
         self.name=kw.get('name')
-        self.color=kw.get('color')
-        if 'nb_infections' in kw:
-            self.nb_infections = kw.get('nb_infections')
+        if 'color' in kw:
+            self.color = kw.get('color')
         else:
-            self.nb_infections=0
+            self.color=black
+        if 'infections' in kw:
+            self.infections = kw.get('infections')
+        else:
+            self.infections=[]
         self.radius = 33
 
     def draw(self,screen):
-        pass
+        cx, cy =self.pos #center of circle
+        angle = 0
+        for i in self.infections:
+            x = cx+ (math.sin(angle) * self.radius)
+            y = cy- (math.cos(angle) * self.radius)
+            i.pos=(x,y)
+            i.draw(screen)
+            angle += 2 * math.pi/len(self.infections)
+
 
     def draw_glow(self,screen):
         glow_size = 5
@@ -31,3 +44,6 @@ class City(Clickable):
         x_mouse, y_mouse = pygame.mouse.get_pos()
         x, y = self.pos
         return (x-x_mouse)**2 + (y-y_mouse)**2 <= self.radius ** 2
+
+    def add_infection(self):
+        self.infections.append(Infection(color=self.color))

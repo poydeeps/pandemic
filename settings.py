@@ -8,7 +8,7 @@ green = (0, 255, 0)
 card_width  = 275
 card_height = 34
 
-list =[
+city_list =[
     ['DUBLIN',blue,(225,462)],
     ['GLASGOW',blue,(421,357)],
     ['LONDON',blue,(339,586)],
@@ -37,3 +37,9 @@ list =[
 
 display_width = 1980
 display_height = 1080
+
+banner_height = 400
+banner_y_offset = 300
+banner_color=(black+(128,))
+
+infection_size = 10

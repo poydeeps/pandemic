@@ -1,11 +1,11 @@
 import pygame, random
 from pygame.locals import *
 from clickable import Clickable
+from rulebook import Rulebook
 from settings import *
 from city import City
-from map import Map
 from deck import Deck
-from card import Card
+#from card import Card
 
 pygame.init()
 font = pygame.font.SysFont(None, 24)
@@ -13,38 +13,23 @@ screen = pygame.display.set_mode((display_width,display_height),pygame.FULLSCREE
 pygame.display.set_caption('Pandemic')
 clock = pygame.time.Clock()
 
-m = Map(list)
-
-player_deck     = Deck(list)
-player_deck.shuffle()
-infection_deck  = Deck(list)
-infection_deck.shuffle()
+game = Rulebook(screen)
 
 #deal player's hand
-player_hand     = Deck([],'PLAYER\'S HAND')
-player_deck.deal(3, player_hand)
+
+game.draw_pile.deal(3, game.player_hand)
 
 #deal archive
-archive         = Deck([],'ARCHIVE')
-player_deck.deal(3, archive)
+game.draw_pile.deal(3, game.archive)
 
 
-dummy_clickable=Clickable(pos=(0,0))
-hovered_object = dummy_clickable
-
-def init_screen():
-    screen.blit(pygame.image.load('map.png'), (0,0))
-    screen.blit(pygame.image.load('infection.png'), (968,13))
-    screen.blit(pygame.image.load('outbreak.png'), (1489,429))
-
-    player_hand.draw(screen,(1623,30))
-    archive.draw(screen,(1623,200))
+hovered_object=Clickable(pos=(0,0))
 
 def check_hover():
     global hovered_object
     if not hovered_object.is_hovered():
-        hovered_object = dummy_clickable
-        for c in player_hand.cards + archive.cards + m.cities:
+        hovered_object=Clickable(pos=(0,0))
+        for c in game.player_hand.cards + game.archive.cards + game.map.cities:
             if c.is_hovered():
                 c.hover = True
                 hovered_object=c
@@ -58,18 +43,26 @@ def draw_glow():
     else:
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
+def execute_action():
+    game.next_move()
+    game.execute_action()
 
 #add event cards
-
-init_screen()
+game.start()
 
 crashed = False
 while not crashed:
 
-    check_hover()
+    #init_screen()
+    game.display()
 
-    init_screen()
-    draw_glow()
+    if game.phase == 'round':
+        check_hover()
+        draw_glow()
+
+    if game.phase == 'setup':
+        #display drawn card + infections
+        game.drawn_cards.show(screen)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -78,6 +71,9 @@ while not crashed:
         elif event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 pygame.quit()
+        elif event.type == MOUSEBUTTONDOWN:
+            execute_action()
+
 
     pygame.display.update()
     clock.tick(15)
