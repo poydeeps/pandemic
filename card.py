@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from clickable import Clickable
+from infection import Infection
 
 class Card(Clickable):
     
@@ -13,6 +14,7 @@ class Card(Clickable):
         else:
             self.font = pygame.font.SysFont(None, 24)
         self.hover=False
+        self.infections = []
     
     def draw_glow(self,screen):
         x,y=self.pos
@@ -37,6 +39,32 @@ class Card(Clickable):
         screen.blit(outline, (x+11,y+9))
         screen.blit(outline, (x+11,y+11))
         screen.blit(text, (x+11,y+10))
+
+        #offset = 2*infection_size
+        #cpt = 0
+        for inf in self.infections:
+            #cpt+=1
+            #inf.color = self.color
+            #inf.pos = (x+card_width + (offset * cpt),y+(card_height/2))
+            inf.draw(screen)
+
+    def add_infection(self):
+        x,y=self.pos
+        x += card_width + 2*infection_size*len(self.infections)
+        y += (card_height/2)
+        self.infections.append(Infection(color=self.color, pos=(x,y)))
+
+    def set_pos(self,pos):
+        self.pos=pos
+        x,y=pos
+        x += card_width
+        y += (card_height/2)
+
+        i=0
+        for inf in self.infections:
+            i+=1
+            x += 4*infection_size
+            inf.pos = (x,y)
 
     def is_hovered(self):
         return self.shape.collidepoint(pygame.mouse.get_pos())
